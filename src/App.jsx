@@ -29,11 +29,14 @@ export default function App() {
 
   const sendNotification = async (message) => {
   if (Notification.permission === "granted") {
-    if ("serviceWorker" in navigator) {
+    try {
       const reg = await navigator.serviceWorker.ready;
-      reg.showNotification("🏃 HomeRun", { body: message });
-    } else {
-      new Notification("🏃 HomeRun", { body: message });
+      await reg.showNotification("🏃 HomeRun", { 
+        body: message,
+        icon: "/vite.svg"
+      });
+    } catch (e) {
+      console.log("Notification error:", e);
     }
   }
 };
@@ -89,11 +92,11 @@ export default function App() {
         const staticDuration = parseInt(route.staticDuration);
         const delayMinutes = Math.round((duration - staticDuration) / 60);
         setTrafficStatus({ duration, staticDuration, delayMinutes });
-        // if (delayMinutes > 5) {
-        //   sendNotification(`⚠️ Traffic alert! ${delayMinutes} min delay on your way home.`);
-        // } else {
-        //   sendNotification(`✅ Road is clear! ${Math.round(duration / 60)} min drive home.`);
-        // }
+        if (delayMinutes > 5) {
+          sendNotification(`⚠️ Traffic alert! ${delayMinutes} min delay on your way home.`);
+        } else {
+          sendNotification(`✅ Road is clear! ${Math.round(duration / 60)} min drive home.`);
+        }
       } else {
         setTrafficStatus({ error: "Could not get route info." });
       }
