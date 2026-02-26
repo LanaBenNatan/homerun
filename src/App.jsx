@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const WORK_RADIUS_METERS = 200;
@@ -22,10 +22,20 @@ export default function App() {
   const [saved, setSaved] = useState(false);
   const [trafficStatus, setTrafficStatus] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [gpsStatus, setGpsStatus] = useState("idle");
+  const [gpsStatus, setGpsStatus] = useState(localStorage.getItem("gpsStatus") || "idle");
   const [workCoords, setWorkCoords] = useState(JSON.parse(localStorage.getItem("workCoords") || "null"));
   const [notifEnabled, setNotifEnabled] = useState(Notification.permission === "granted");
   const wasAtWork = useRef(false);
+
+useEffect(() => {
+  if (gpsStatus === "at_work" || gpsStatus === "idle") {
+    const savedCoords = JSON.parse(localStorage.getItem("workCoords") || "null");
+    if (savedCoords) {
+      startWatching();
+    }
+  }
+}, []);
+
 
   const sendNotification = async (message) => {
     if (Notification.permission === "granted") {
@@ -113,9 +123,11 @@ export default function App() {
         if (dist < WORK_RADIUS_METERS) {
           wasAtWork.current = true;
           setGpsStatus("at_work");
+          localStorage.setItem("gpsStatus", "at_work");
         } else if (wasAtWork.current) {
           wasAtWork.current = false;
           setGpsStatus("left_work");
+          localStorage.setItem("gpsStatus", "left_work");
           checkTraffic();
         }
       },
