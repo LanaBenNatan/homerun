@@ -173,23 +173,33 @@ export default function App() {
         </div>
 
         {/* Actions Card */}
-        <div style={{ display: "flex", gap: 10 }}>
-        <button onClick={checkTraffic} disabled={!homeAddress || !workAddress || loading}
-          style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #0ea5e9, #2563eb)", opacity: (!homeAddress || !workAddress) ? 0.5 : 1 }}>
-          <span style={{ fontSize: 22 }}>🚦</span>
-          <span>{loading ? "..." : "Check Traffic"}</span>
-        </button>
+      <div style={{ display: "flex", gap: 10 }}>
+      <button onClick={checkTraffic} disabled={!homeAddress || !workAddress || loading}
+        style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #0ea5e9, #2563eb)", opacity: (!homeAddress || !workAddress) ? 0.5 : 1 }}>
+        <span style={{ fontSize: 22 }}>🚦</span>
+        <span>{loading ? "..." : "Check Traffic"}</span>
+      </button>
+      <div style={{ flex: 1, position: "relative" }}>
+        {notifEnabled && (
+          <div style={{ position: "absolute", top: -6, right: -6, background: "#22c55e", borderRadius: "50%", width: 18, height: 18, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #0f1117", zIndex: 1 }}>✓</div>
+        )}
         <button onClick={requestNotificationPermission}
-          style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: notifEnabled ? "linear-gradient(135deg, #16a34a, #15803d)" : "linear-gradient(135deg, #0d9488, #0891b2)" }}>
+          style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #0d9488, #0891b2)" }}>
           <span style={{ fontSize: 22 }}>🔔</span>
           <span>Notifications</span>
         </button>
+      </div>
+      <div style={{ flex: 1, position: "relative" }}>
+        {(gpsStatus === "at_work" || gpsStatus === "left_work") && (
+          <div style={{ position: "absolute", top: -6, right: -6, background: "#22c55e", borderRadius: "50%", width: 18, height: 18, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #0f1117", zIndex: 1 }}>✓</div>
+        )}
         <button onClick={startWatching}
-          style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: gpsStatus === "at_work" || gpsStatus === "left_work" ? "linear-gradient(135deg, #16a34a, #15803d)" : "linear-gradient(135deg, #475569, #334155)" }}>
+          style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #475569, #334155)" }}>
           <span style={{ fontSize: 22 }}>📍</span>
           <span>Monitor</span>
         </button>
       </div>
+    </div>
 
        {/* Traffic Result */}
         {trafficStatus && !trafficStatus.error && (
