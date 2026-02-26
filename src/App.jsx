@@ -203,7 +203,7 @@ export default function App() {
 
        {/* Traffic Result */}
         {trafficStatus && !trafficStatus.error && (
-          <div style={{ padding: 16, borderRadius: 16, background: trafficStatus.delayMinutes > 5 ? "#2d1f0a" : "#0a2d1f", border: `1px solid ${trafficStatus.delayMinutes > 5 ? "#92400e" : "#065f46"}`, marginBottom: 16 }}>
+          <div style={{ padding: 16, borderRadius: 16, marginTop: 16, background: trafficStatus.delayMinutes > 5 ? "#2d1f0a" : "#0a2d1f", border: `1px solid ${trafficStatus.delayMinutes > 5 ? "#92400e" : "#065f46"}`, marginBottom: 16 }}>
             <h3 style={{ margin: "0 0 12px", fontSize: 18, color: trafficStatus.delayMinutes > 5 ? "#f59e0b" : "#34d399" }}>
               {trafficStatus.delayMinutes > 5 ? "⚠️ Traffic Detected" : "✅ Road is Clear"}
             </h3>
