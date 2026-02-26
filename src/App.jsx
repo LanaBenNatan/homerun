@@ -92,8 +92,8 @@ export default function App() {
       } else {
         setTrafficStatus({ error: "Could not get route info." });
       }
-    } catch {
-      setTrafficStatus({ error: "Something went wrong." });
+    } catch (e) {
+  setTrafficStatus({ error: e.message });
     }
     setLoading(false);
   };
