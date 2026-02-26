@@ -89,11 +89,11 @@ export default function App() {
         const staticDuration = parseInt(route.staticDuration);
         const delayMinutes = Math.round((duration - staticDuration) / 60);
         setTrafficStatus({ duration, staticDuration, delayMinutes });
-        if (delayMinutes > 5) {
-          sendNotification(`⚠️ Traffic alert! ${delayMinutes} min delay on your way home.`);
-        } else {
-          sendNotification(`✅ Road is clear! ${Math.round(duration / 60)} min drive home.`);
-        }
+        // if (delayMinutes > 5) {
+        //   sendNotification(`⚠️ Traffic alert! ${delayMinutes} min delay on your way home.`);
+        // } else {
+        //   sendNotification(`✅ Road is clear! ${Math.round(duration / 60)} min drive home.`);
+        // }
       } else {
         setTrafficStatus({ error: "Could not get route info." });
       }
