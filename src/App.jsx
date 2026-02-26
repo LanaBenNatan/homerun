@@ -163,7 +163,7 @@ export default function App() {
           </div>
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: "block", fontSize: 13, color: "#94a3b8", marginBottom: 6 }}>Work Address</label>
-            <input value={workAddress} onChange={(e) => setWorkAddress(e.target.value)} placeholder="e.g. Migdal Tefen, Israel"
+            <input value={workAddress} onChange={(e) => setWorkAddress(e.target.value)} placeholder="e.g. ISCAR Headquarters, Israel"
               style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid #2d3148", background: "#0f1117", color: "#e2e8f0", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
           </div>
           <button onClick={saveAddresses}
