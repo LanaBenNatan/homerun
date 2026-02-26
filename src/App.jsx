@@ -27,11 +27,16 @@ export default function App() {
   const [notifEnabled, setNotifEnabled] = useState(Notification.permission === "granted");
   const wasAtWork = useRef(false);
 
-  const sendNotification = (message) => {
-    if (Notification.permission === "granted") {
+  const sendNotification = async (message) => {
+  if (Notification.permission === "granted") {
+    if ("serviceWorker" in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      reg.showNotification("🏃 HomeRun", { body: message });
+    } else {
       new Notification("🏃 HomeRun", { body: message });
     }
-  };
+  }
+};
 
   const requestNotificationPermission = async () => {
     const permission = await Notification.requestPermission();
