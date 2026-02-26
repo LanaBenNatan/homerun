@@ -173,28 +173,25 @@ export default function App() {
         </div>
 
         {/* Actions Card */}
-        <div style={{ background: "#1e2130", borderRadius: 16, padding: 20, border: "1px solid #2d3148", marginBottom: 16, boxSizing: "border-box" }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1, marginBottom: 16 }}>⚡ Actions</div>
-          <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={checkTraffic} disabled={!homeAddress || !workAddress || loading}
-              style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #0ea5e9, #2563eb)", opacity: (!homeAddress || !workAddress) ? 0.5 : 1 }}>
-              <span style={{ fontSize: 22 }}>🚦</span>
-              <span>{loading ? "..." : "Check Traffic"}</span>
-            </button>
-            <button onClick={requestNotificationPermission}
-              style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #0d9488, #0891b2)" }}>
-              <span style={{ fontSize: 22 }}>🔔</span>
-              <span>Notifications</span>
-            </button>
-            <button onClick={startWatching}
-              style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #475569, #334155)" }}>
-              <span style={{ fontSize: 22 }}>📍</span>
-              <span>Monitor</span>
-            </button>
-          </div>
-        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+        <button onClick={checkTraffic} disabled={!homeAddress || !workAddress || loading}
+          style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #0ea5e9, #2563eb)", opacity: (!homeAddress || !workAddress) ? 0.5 : 1 }}>
+          <span style={{ fontSize: 22 }}>🚦</span>
+          <span>{loading ? "..." : "Check Traffic"}</span>
+        </button>
+        <button onClick={requestNotificationPermission}
+          style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: notifEnabled ? "linear-gradient(135deg, #16a34a, #15803d)" : "linear-gradient(135deg, #0d9488, #0891b2)" }}>
+          <span style={{ fontSize: 22 }}>🔔</span>
+          <span>Notifications</span>
+        </button>
+        <button onClick={startWatching}
+          style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: gpsStatus === "at_work" || gpsStatus === "left_work" ? "linear-gradient(135deg, #16a34a, #15803d)" : "linear-gradient(135deg, #475569, #334155)" }}>
+          <span style={{ fontSize: 22 }}>📍</span>
+          <span>Monitor</span>
+        </button>
+      </div>
 
-        {/* Traffic Result */}
+       {/* Traffic Result */}
         {trafficStatus && !trafficStatus.error && (
           <div style={{ padding: 16, borderRadius: 16, background: trafficStatus.delayMinutes > 5 ? "#2d1f0a" : "#0a2d1f", border: `1px solid ${trafficStatus.delayMinutes > 5 ? "#92400e" : "#065f46"}`, marginBottom: 16 }}>
             <h3 style={{ margin: "0 0 12px", fontSize: 18, color: trafficStatus.delayMinutes > 5 ? "#f59e0b" : "#34d399" }}>
