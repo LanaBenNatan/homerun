@@ -125,7 +125,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0f1117", color: "#e2e8f0", fontFamily: "'Segoe UI', sans-serif", boxSizing: "border-box", overflowX: "hidden" }}>
+    <div style={{ minHeight: "100vh", width: "100vw", background: "#0f1117", color: "#e2e8f0", fontFamily: "'Segoe UI', sans-serif", boxSizing: "border-box", overflowX: "hidden" }}>
       <div style={{ width: "100%", padding: "24px 16px", boxSizing: "border-box" }}>
 
         {/* Header */}
