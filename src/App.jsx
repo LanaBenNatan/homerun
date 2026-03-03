@@ -25,23 +25,14 @@ export default function App() {
   const [gpsStatus, setGpsStatus] = useState(localStorage.getItem("gpsStatus") || "idle");
   const [workCoords, setWorkCoords] = useState(JSON.parse(localStorage.getItem("workCoords") || "null"));
   const [notifEnabled, setNotifEnabled] = useState(Notification.permission === "granted");
+  const [btDevice, setBtDevice] = useState(JSON.parse(localStorage.getItem("btDevice") || "null"));
   const wasAtWork = useRef(false);
-
-useEffect(() => {
-  if (gpsStatus === "at_work" || gpsStatus === "idle") {
-    const savedCoords = JSON.parse(localStorage.getItem("workCoords") || "null");
-    if (savedCoords) {
-      startWatching();
-    }
-  }
-}, []);
-
 
   const sendNotification = async (message) => {
     if (Notification.permission === "granted") {
       try {
         const reg = await navigator.serviceWorker.ready;
-        await reg.showNotification("🏃 HomeRun", { body: message, icon: "/vite.svg" });
+        await reg.showNotification("🏃 HomeRun", { body: message, icon: "/icon.svg" });
       } catch (e) {
         console.log("Notification error:", e);
       }
@@ -136,6 +127,57 @@ useEffect(() => {
     );
   };
 
+  useEffect(() => {
+    if (gpsStatus === "at_work" || gpsStatus === "idle") {
+      const savedCoords = JSON.parse(localStorage.getItem("workCoords") || "null");
+      if (savedCoords) startWatching();
+    }
+  }, []);
+
+  const pairBluetooth = async () => {
+    if (!navigator.bluetooth) {
+      alert("Bluetooth is not supported on this browser. Try Chrome on Android.");
+      return;
+    }
+    try {
+      const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+      const saved = { id: device.id, name: device.name };
+      localStorage.setItem("btDevice", JSON.stringify(saved));
+      setBtDevice(saved);
+
+      // Listen for connection
+      device.addEventListener("gattserverdisconnected", () => {
+        console.log("Bluetooth disconnected");
+      });
+
+      await device.gatt.connect();
+      device.addEventListener("gattserverdisconnected", async () => {});
+      
+      // Watch for reconnection = getting in car
+      const watchConnection = async () => {
+        try {
+          await device.gatt.connect();
+          // Connected to car bluetooth = check traffic!
+          checkTraffic();
+        } catch {}
+      };
+
+      device.addEventListener("advertisementreceived", watchConnection);
+      await device.watchAdvertisements();
+
+      alert(`✅ Paired with "${device.name}"! Traffic will be checked automatically when you connect.`);
+    } catch (e) {
+      if (e.name !== "NotFoundError") {
+        alert("Could not pair: " + e.message);
+      }
+    }
+  };
+
+  const removeBtDevice = () => {
+    localStorage.removeItem("btDevice");
+    setBtDevice(null);
+  };
+
   return (
     <div style={{ minHeight: "100vh", width: "100vw", background: "#0f1117", color: "#e2e8f0", fontFamily: "'Segoe UI', sans-serif", boxSizing: "border-box", overflowX: "hidden" }}>
       <div style={{ width: "100%", padding: "24px 16px", boxSizing: "border-box" }}>
@@ -184,36 +226,63 @@ useEffect(() => {
           </button>
         </div>
 
-        {/* Actions Card */}
-      <div style={{ display: "flex", gap: 10 }}>
-      <button onClick={checkTraffic} disabled={!homeAddress || !workAddress || loading}
-        style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #0ea5e9, #2563eb)", opacity: (!homeAddress || !workAddress) ? 0.5 : 1 }}>
-        <span style={{ fontSize: 22 }}>🚦</span>
-        <span>{loading ? "..." : "Check Traffic"}</span>
-      </button>
-      <div style={{ flex: 1, position: "relative" }}>
-        {notifEnabled && (
-          <div style={{ position: "absolute", top: -6, right: -6, background: "#22c55e", borderRadius: "50%", width: 18, height: 18, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #0f1117", zIndex: 1 }}>✓</div>
-        )}
-        <button onClick={requestNotificationPermission}
-          style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #0d9488, #0891b2)" }}>
-          <span style={{ fontSize: 22 }}>🔔</span>
-          <span>Notifications</span>
-        </button>
-      </div>
-      <div style={{ flex: 1, position: "relative" }}>
-        {(gpsStatus === "at_work" || gpsStatus === "left_work") && (
-          <div style={{ position: "absolute", top: -6, right: -6, background: "#22c55e", borderRadius: "50%", width: 18, height: 18, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #0f1117", zIndex: 1 }}>✓</div>
-        )}
-        <button onClick={startWatching}
-          style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #475569, #334155)" }}>
-          <span style={{ fontSize: 22 }}>📍</span>
-          <span>Monitor</span>
-        </button>
-      </div>
-    </div>
+        {/* Bluetooth Card */}
+        <div style={{ background: "#1e2130", borderRadius: 16, padding: 20, border: "1px solid #2d3148", marginBottom: 16, boxSizing: "border-box" }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>🚗 Car Bluetooth</div>
+          {!btDevice ? (
+            <>
+              <p style={{ fontSize: 13, color: "#64748b", marginBottom: 16 }}>Pair your car's Bluetooth to automatically check traffic when you get in.</p>
+              <button onClick={pairBluetooth}
+                style={{ width: "100%", padding: 12, background: "linear-gradient(135deg, #1d4ed8, #2563eb)", color: "white", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <span>🔵</span><span>Pair Car Bluetooth</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <div style={{ background: "#0f1117", borderRadius: 10, padding: "12px 16px", border: "1px solid #2d3148", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#e2e8f0" }}>🔵 {btDevice.name}</div>
+                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>Paired — will trigger traffic check</div>
+                </div>
+                <button onClick={removeBtDevice} style={{ background: "none", border: "none", color: "#ef4444", fontSize: 18, cursor: "pointer" }}>✕</button>
+              </div>
+              <button onClick={pairBluetooth}
+                style={{ width: "100%", padding: 12, background: "linear-gradient(135deg, #1d4ed8, #2563eb)", color: "white", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <span>🔄</span><span>Change Device</span>
+              </button>
+            </>
+          )}
+        </div>
 
-       {/* Traffic Result */}
+        {/* Actions Card */}
+        <div style={{ background: "#1e2130", borderRadius: 16, padding: 20, border: "1px solid #2d3148", marginBottom: 16, boxSizing: "border-box" }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1, marginBottom: 16 }}>⚡ Actions</div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={checkTraffic} disabled={!homeAddress || !workAddress || loading}
+              style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #0ea5e9, #2563eb)", opacity: (!homeAddress || !workAddress) ? 0.5 : 1 }}>
+              <span style={{ fontSize: 22 }}>🚦</span>
+              <span>{loading ? "..." : "Check Traffic"}</span>
+            </button>
+            <div style={{ flex: 1, position: "relative" }}>
+              {notifEnabled && <div style={{ position: "absolute", top: -6, right: -6, background: "#22c55e", borderRadius: "50%", width: 18, height: 18, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #0f1117", zIndex: 1 }}>✓</div>}
+              <button onClick={requestNotificationPermission}
+                style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #0d9488, #0891b2)" }}>
+                <span style={{ fontSize: 22 }}>🔔</span>
+                <span>Notifications</span>
+              </button>
+            </div>
+            <div style={{ flex: 1, position: "relative" }}>
+              {(gpsStatus === "at_work" || gpsStatus === "left_work") && <div style={{ position: "absolute", top: -6, right: -6, background: "#22c55e", borderRadius: "50%", width: 18, height: 18, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #0f1117", zIndex: 1 }}>✓</div>}
+              <button onClick={startWatching}
+                style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px", border: "none", borderRadius: 12, cursor: "pointer", color: "white", fontSize: 11, fontWeight: 600, background: "linear-gradient(135deg, #475569, #334155)" }}>
+                <span style={{ fontSize: 22 }}>📍</span>
+                <span>Monitor</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Traffic Result */}
         {trafficStatus && !trafficStatus.error && (
           <div style={{ marginTop: 16, padding: 16, borderRadius: 16, background: trafficStatus.delayMinutes > 5 ? "#2d1f0a" : "#0a2d1f", border: `1px solid ${trafficStatus.delayMinutes > 5 ? "#92400e" : "#065f46"}`, marginBottom: 16 }}>
             <h3 style={{ margin: "0 0 12px", fontSize: 18, color: trafficStatus.delayMinutes > 5 ? "#f59e0b" : "#34d399" }}>
